@@ -34,7 +34,7 @@ var server = net.createServer( function ( request ) {
 
 });
 
-server.listen({ port: 8080, address: 'localhost' });
+server.listen( { port: 8080, address: 'localhost' } );
 
 function getResponse( uri ){
   let response = 'HTTP/1.1 200 OK\n';
@@ -52,6 +52,7 @@ function getResponse( uri ){
       return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
     case '/css/styles.css':
       text = styText();
+      response2 = 'Server: JohnWAngel\nContent-Type: text/css; charset=utf-8\nDate: ' + Date() + '\n';
       return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
     default:
       return 'HTTP/1.1 404 Not Found\n' + response2 + '\n' + notFound();
