@@ -11,111 +11,75 @@ var server = net.createServer( function ( request ) {
     let method = methodArray[0];
     let uri = methodArray[1];
     let http = methodArray[2];
-    if (method = 'GET') {
-      request.write(String(getResponse(uri)));
+    switch (method){
+      case 'GET':
+        request.write(String(getResponse(uri)));
+        break;
+      case 'HEAD':
+        request.write(String(getResponse(uri)).split('\n\n')[0] + '\n\n');
+        break;
+      case 'POST':
 
-    } else if (method = 'POST') {
-      console.log('this is a post request');
+        break;
+      case 'PUT':
 
-    } else if (method = 'PUT') {
-      console.log('this is a put request');
+        break;
+      default:
+
+        break;
     }
-
-
-
-
-    //data = String(data).replace(/\r?\n|\r/, '');
-
-    // //DEFAULT IF THIS IS NOT FIRST MESSAGE FROM USER.
-    // if (handle === false){
-    //   for (let connections in serverArray){
-    //     if ( userName !== serverArray[connections].name) {
-    //       serverArray[connections].socket.write(`[${userName}] ${data}`);
-    //     }
-    //   }
-    // }
 
     request.end();
   });
 
-  //CONNECTION HAS CLOSED
-//   connection.on('end', ( packet ) => {
-//     let i = 0;
-//     for (let connections in serverArray){
-//       if ( userName === serverArray[connections].name) {
-//         serverArray.splice(i, 1);
-//         for (let connections in serverArray){
-//           serverArray[connections].socket.write(`[ADMIN] ${userName} abandoned us!`);
-//         }
-//       }
-//       i++;
-//     }
-//   });
 });
 
 server.listen({ port: 8080, address: 'localhost' });
 
-// //ADMIN BROADCAST
-// process.stdin.on('data', data  => {
-//   data = String(data).replace( /\r?\n|\r/, '');
-//   if (data.indexOf('\\kick') !== -1) {
-//     if (data.includes(':')){
-//       removePort( data.split(':')[1] );
-//       data = `User ${data.split(':')[1]} has been ousted!`;
-//     } else {
-//       let idx = checkForUser( data.split(' ')[1] );
-//       if ( idx > -1 ) {
-//         removeUser( user, idx );
-//         data = `${user} has been ousted!`;
-//       } else {
-//         console.log('That user does not exist.');
-//         return;
-//       }
-//     }
-//   }
-
-//   for (let connections in serverArray){
-//     serverArray[connections].socket.write(`[ADMIN] ${data}`);
-//   }
-// });
-
-function getResponse(uri){
-  let response = `HTTP/1.1 200 OK\n\n`;
-
+function getResponse( uri ){
+  let response = 'HTTP/1.1 200 OK\n';
+  let response2 = 'Server: JohnWAngel\nContent-Type: text/html; charset=utf-8\nDate: ' + Date() + '\n';
   switch (uri) {
     case '/helium.html':
-      return response += heText();
+      text = heText();
+      return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
     case '/hydrogen.html':
-      return response += hText();
+      text = hText();
+      return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
+    case '/':
     case '/index.html':
-      return response += idxText();
-    case '/styles.css':
-      return response += styText();
+      text = idxText();
+      return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
+    case '/css/styles.css':
+      text = styText();
+      return response + response2 + 'Content-Length: ' + text[1] + '\n\n' + text[0];
     default:
-      return notFound();
+      return 'HTTP/1.1 404 Not Found\n' + response2 + '\n' + notFound();
   }
 }
 
-function heliumText() {
-  return `<!DOCTYPE html>
-            <html lang="en">
-            <head>
-              <meta charset="UTF-8">
-              <title>The Elements - Hydrogen</title>
-              <link rel="stylesheet" href="/css/styles.css">
-            </head>
-            <body>
-              <h1>Hydrogen</h1>
-              <h2>H</h2>
-              <h3>Atomic number 1</h3>
-              <p>Hydrogen is a chemical element with chemical symbol H and atomic number 1. With an atomic weight of 1.00794 u, hydrogen is the lightest element on the periodic table. Its monatomic form (H) is the most abundant chemical substance in the universe, constituting roughly 75% of all baryonic mass. Non-remnant stars are mainly composed of hydrogen in its plasma state. The most common isotope of hydrogen, termed protium (name rarely used, symbol 1H), has a single proton and zero neutrons.</p>
-              <p><a href="/">back</a></p>
-            </body>
-            </html>`;
+
+function heText() {
+  let text = `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <title>The Elements - Helium</title>
+                  <link rel="stylesheet" href="/css/styles.css">
+                </head>
+                <body>
+                  <h1>Helium</h1>
+                  <h2>H</h2>
+                  <h3>Atomic number 2</h3>
+                  <p>Helium is a chemical element with symbol He and atomic number 2. It is a colorless, odorless, tasteless, non-toxic, inert, monatomic gas that heads the noble gas group in the periodic table. Its boiling and melting points are the lowest among all the elements and it exists only as a gas except in extremely cold conditions.</p>
+                  <p><a href="/">back</a></p>
+                </body>
+                </html>`;
+    return [text, lengthInUtf8Bytes(text)];
 }
 
 function hText(){
-  return `<!DOCTYPE html>
+  let text = `<!DOCTYPE html>
             <html lang="en">
             <head>
               <meta charset="UTF-8">
@@ -130,10 +94,11 @@ function hText(){
               <p><a href="/">back</a></p>
             </body>
             </html>`;
+      return [text, lengthInUtf8Bytes(text)];
 }
 
 function idxText(){
-  return `<!DOCTYPE html>
+  let text = `<!DOCTYPE html>
             <html lang="en">
             <head>
               <meta charset="UTF-8">
@@ -154,10 +119,11 @@ function idxText(){
               </ol>
             </body>
             </html>`;
+  return [text, lengthInUtf8Bytes(text)];
 }
 
 function styText(){
-  return `@import url(http://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab);
+  let text = `@import url(http://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab);
 
             /* http://meyerweb.com/eric/tools/css/reset/
                v2.0 | 20110126
@@ -267,6 +233,8 @@ function styText(){
               color: #C6C5AC;
               border-bottom: 1px dashed #C6C5AC;
             }`;
+
+    return [text, lengthInUtf8Bytes(text)];
 }
 
 function notFound(){
@@ -287,3 +255,8 @@ function notFound(){
           </html>`;
 }
 
+function lengthInUtf8Bytes(str) {
+  // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+  var m = encodeURIComponent(str).match(/%[89ABab]/g);
+  return str.length + (m ? m.length : 0);
+}
